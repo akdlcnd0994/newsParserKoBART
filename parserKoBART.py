@@ -7,7 +7,7 @@ from transformers import PreTrainedTokenizerFast
 from transformers import BartForConditionalGeneration
 
 cx_Oracle.init_oracle_client(lib_dir=r"C:\Program Files\Oracle\instantclient_19_9")
-connection = cx_Oracle.connect(user='admin', password='Rheodml123!!', dsn='react_high')
+connection = cx_Oracle.connect(user='admin', password='reactProject0994', dsn='react_high')
 cursor = connection.cursor()
 
 enterUrl = "https://m.entertain.naver.com/ranking"
