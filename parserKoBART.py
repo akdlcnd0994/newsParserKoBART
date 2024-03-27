@@ -107,7 +107,7 @@ def enterParser(url):
         if(data.find("div", {"class":"thumb"}).find("img")==None):
             continue
         else:
-            img = data.find("div", {"class":"thumb"}).find("img")
+            img = data.find("div", {"class":"thumb"}).find("img")["data-src"]
         link = data.find("a")["href"] #url
         title= data.find("p",{"class":"tx"}).get_text() #title
 
@@ -122,7 +122,6 @@ def enterParser(url):
         #koBART 호출
 
         content = short(text)
-
         db(6, title, content, img, link)
         
 
