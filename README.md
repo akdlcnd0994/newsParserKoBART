@@ -6,9 +6,9 @@ newsSummary 프로젝트의 데이터를 담당하며
 Idx(항목구분), Title, Content, Img, Link 항목을 파싱하여 제공한다.
 
 해당 프로그램은 1시간 간격으로 실행하여 DB 데이터를 갱신예정
-![image](https://github.com/akdlcnd0994/newsParserKoBART/assets/28687142/dc35dcb7-ccab-481b-94bb-df706b113a9a)
+![image](https://github.com/akdlcnd0994/newsParserKoBART/assets/28687142/9fad449f-dee2-42bc-98aa-f192d89c6425)
 
 
 
 
-- 현재 언론사별 파트 수정필요
+
