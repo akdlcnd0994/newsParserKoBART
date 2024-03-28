@@ -2,6 +2,7 @@ import torch
 import requests
 import re
 import cx_Oracle
+import time
 from bs4 import BeautifulSoup
 from transformers import PreTrainedTokenizerFast
 from transformers import BartForConditionalGeneration
@@ -14,14 +15,15 @@ enterUrl = "https://m.entertain.naver.com/ranking"
 newsUrl = "https://news.naver.com/section/10"
 rankingUrl = "https://news.naver.com/main/ranking/popularDay.naver"
 
-def db(idx, title, content, img, link):
-    sql = 'insert into news(idx,title,content,img,link) values(:1,:2,:3,:4,:5)'
+dbList = []
+
+def db(idx, title, content, img, link, company, icon):
+    sql = 'insert into news(idx,title,content,img,link, company, icon) values(:1,:2,:3,:4,:5, :6, :7)'
     # 테이블에 데이터 삽입
-    cursor.execute(sql, (idx,title,content,img,link))
+    cursor.execute(sql, (idx,title,content,img,link, company, icon))
 
     # 변경사항 commit
     connection.commit()
-
 
 
 
@@ -64,36 +66,41 @@ def newsParser(url, idx):
 
         content = short(text)
 
-        db(idx, title, content, img, link)
+        dbList.append([idx, title, content, img, link, "", ""])
         
 
 def rankingParser(url):
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
     datas = soup.find("div", {"class" : "rankingnews_box_wrap"}).find_all("div", {"class" : "rankingnews_box"})
+
     a=7
     for data in datas:
-        img = data.find("img")["src"]
+        icon = data.find("img")["src"]
         company = data.find("strong").get_text()
-
         infos = data.find("ul",{"class":"rankingnews_list"}).find_all("li")
         for info in infos:
             link = info.find("a")["href"] #link
             title = info.find("a").get_text()
+            if(info.find("img")==None):
+                continue
+            else:
+                img = info.find("img")["src"]
         
-        r2 = requests.get(link)
-        soup2 = BeautifulSoup(r2.text, 'html.parser')
-        text = soup2.find("div", {"id" : "ct"}).find("article", {"id" : "dic_area"}).get_text()
+            r2 = requests.get(link)
+            soup2 = BeautifulSoup(r2.text, 'html.parser')
+            text = soup2.find("div", {"id" : "ct"}).find("article", {"id" : "dic_area"}).get_text()
 
-        text = re.sub("\n", "", text) # content
+            text = re.sub("\n", "", text) # content
 
-        text=text[:1024]
+            text=text[:1024]
 
-        #koBART 호출
+            #koBART 호출
 
-        content = short(text)
-        
-        db(a, title, content, img, link)
+            content = short(text)
+
+            print(a, title, content, img, link, company, icon)
+            dbList.append([a, title, content, img, link, company, icon])
         a+=1
         
 
@@ -122,18 +129,24 @@ def enterParser(url):
         #koBART 호출
 
         content = short(text)
-        db(6, title, content, img, link)
+        dbList.append([6, title, content, img, link, "", ""])
         
 
-sql='delete from news'
-cursor.execute(sql)
-connection.commit()
+
 
 
 for i in range(0,6):
     newsParser("https://news.naver.com/section/10" + str(i), i)
 enterParser(enterUrl)
 rankingParser(rankingUrl)
+
+sql='delete from news'
+cursor.execute(sql)
+connection.commit()
+
+for i in range(len(dbList)):
+    db(dbList[i][0], dbList[i][1], dbList[i][2], dbList[i][3], dbList[i][4], dbList[i][5], dbList[i][6])
+
 
 cursor.close()
 connection.close()
